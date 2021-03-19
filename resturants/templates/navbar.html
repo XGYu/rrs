@@ -1,0 +1,27 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mg-3">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">餐馆推荐</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto mb-2 mb-lg-0">
+        {% if not request.session.is_login %}
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/">主页</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/login">登录</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/register">注册</a>
+        </li>
+        {% else %}
+        <li class="nav-item">
+          <a class="nav-link" href="/logout">登出</a>
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>

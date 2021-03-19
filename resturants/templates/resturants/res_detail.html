@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card bg-dark" style="width: 25rem;">
+          <img src="{{ object.res_image.url }}" class="card-img-top" alt="...">
+          <div class="card-body">
+            <h5 class="card-title">{{ object.name }}</h5>
+            <p class="card-text">{{ object.address }}</p>
+            <p class="card-text">{{ object.type }}</p>
+            <p class="card-text">口味:{{ object.rate_taste }}  环境:{{ object.rate_surround }}  服务:{{ object.rate_service }}</p>
+          </div>
+        </div>
+{% endblock content %}
