@@ -3,6 +3,7 @@ import os
 
 from functools import wraps
 from django.shortcuts import render, redirect
+from django.apps import apps
 from django.http import HttpResponse
 from .models import *
 from .forms import *
@@ -104,8 +105,23 @@ def login_confirm(func):
 @login_confirm
 def res_detail_view(request, pk, *args, **kwargs):
     resturant = Resturant.objects.get(pk=pk)
-    if request.method == "GET":
-
+    auth = apps.get_app_config("resturants")
+    print(auth.get_model("User").pk)
+    if request.method == "POST":
+        comment_form = CommentForm(request.POST or None)
+        message = ""
+        if comment_form.is_valid():
+            content = comment_form.cleaned_data["content"]
+            rate_taste = comment_form.cleaned_data["rate_taste"]
+            rate_surround = comment_form.cleaned_data["rate_surround"]
+            rate_service = comment_form.cleaned_data["rate_service"]
+            new_comment = Comment()
+            new_comment.content =content
+            new_comment.rate_taste = rate_taste
+            new_comment.rate_surround = rate_surround
+            new_comment.rate_service = rate_service
+            new_comment.resturant = resturant
+            # user = request.session
     return render(request, "resturants/res_detail.html", {"object": resturant})
 
 
