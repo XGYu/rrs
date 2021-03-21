@@ -112,6 +112,7 @@ def res_detail_view(request, pk, *args, **kwargs):
     info_qs = Info.objects.filter(Q(user=user), Q(resturant=resturant))  # 找到当前用户在当前餐厅的用餐记录
     comment_qs = Comment.objects.filter(resturant=resturant)
     my_comment_qs = Comment.objects.filter(resturant=resturant)
+    clicklunch = False
     if request.method == "POST":
         content = request.POST.get("comment" or None)
         rate_taste = 5
@@ -158,6 +159,15 @@ def res_detail_view(request, pk, *args, **kwargs):
         #     new_comment.user = user
         #     new_comment.create_time = timezone.now()
         #     new_comment.save()
+    if request.method == "GET":
+        if request.GET.get("lunchevent") and (not clicklunch):
+            info = Info()
+            info.resturant = resturant
+            info.user = user
+            info.info_time = timezone.now()
+            info.save()
+            clicklunch = True
+
     return render(request, "resturants/res_detail.html", locals())
 
 

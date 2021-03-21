@@ -16,7 +16,14 @@
               {% else %}
               <p class="card-text">我已在该餐厅用过餐</p>
               {% endif %}
-              <button type="button" class="btn btn-primary">用餐</button>
+            <form method="get">
+              {% if not clicklunch %}
+                <input type="hidden" name="lunchevent" value=1>
+                <button name="lunchevent1" type="submit" class="btn btn-primary pull-right">用餐</button>
+              {% else %}
+                <p class="card-text">本次订餐成功！</p>
+              {% endif %}
+            </form>
           </div>
     </div>
 </div>
@@ -99,8 +106,10 @@
     {% if comment_qs %}
     <ul class="list-group">
     {% for comment in comment_qs %}
-    <li class="list-group-item list-group-item-dark">用户:{{comment.user.username}}<br/>
-        口味:{{ comment.rate_taste }}  环境:{{ comment.rate_surround }}  服务:{{ comment.rate_service }}<br/>{{ comment.content }}</li>
+    <li class="list-group-item list-group-item-dark">用户:{{comment.user.username}}  {{ comment.create_time|date:"Y-m-d" }}<br/>
+        口味:{{ comment.rate_taste }}  环境:{{ comment.rate_surround }}  服务:{{ comment.rate_service }}
+        <br/>{{ comment.content }}
+    </li>
     {% endfor %}
     </ul>
     {% else %}
