@@ -2,8 +2,9 @@ import json
 import os
 
 from functools import wraps
+from django.utils import timezone
+from django.db.models import Q
 from django.shortcuts import render, redirect
-from django.apps import apps
 from django.http import HttpResponse
 from .models import *
 from .forms import *
@@ -105,24 +106,42 @@ def login_confirm(func):
 @login_confirm
 def res_detail_view(request, pk, *args, **kwargs):
     resturant = Resturant.objects.get(pk=pk)
-    auth = apps.get_app_config("resturants")
-    print(auth.get_model("User").pk)
+    username = request.session["user_name"]
+    user = User.objects.get(username=username)  # 当前的登录用户
+    info_qs = Info.objects.filter(Q(user=user), Q(resturant=resturant))  # 找到当前用户在当前餐厅的用餐记录
+    comment_qs = Comment.objects.filter(resturant=resturant)
+    my_comment_qs = Comment.objects.filter(resturant=resturant)
     if request.method == "POST":
-        comment_form = CommentForm(request.POST or None)
-        message = ""
-        if comment_form.is_valid():
-            content = comment_form.cleaned_data["content"]
-            rate_taste = comment_form.cleaned_data["rate_taste"]
-            rate_surround = comment_form.cleaned_data["rate_surround"]
-            rate_service = comment_form.cleaned_data["rate_service"]
-            new_comment = Comment()
-            new_comment.content =content
-            new_comment.rate_taste = rate_taste
-            new_comment.rate_surround = rate_surround
-            new_comment.rate_service = rate_service
-            new_comment.resturant = resturant
-            # user = request.session
-    return render(request, "resturants/res_detail.html", {"object": resturant})
+        content = request.POST.get("comment")
+        rate_taste = int(request.POST.get("select1"))
+        rate_surround = int(request.POST.get("select2"))
+        rate_service = int(request.POST.get("select3"))
+        new_comment = Comment()
+        new_comment.resturant = resturant
+        new_comment.user = user
+        new_comment.content = content
+        new_comment.rate_taste = rate_taste
+        new_comment.rate_surround = rate_surround
+        new_comment.rate_service = rate_service
+        new_comment.create_time = timezone.now()
+        new_comment.save()
+        # comment_form = CommentForm(request.POST or None)
+        # message = ""
+        # if comment_form.is_valid():
+        #     content = comment_form.cleaned_data["content"]
+        #     rate_taste = comment_form.cleaned_data["rate_taste"]
+        #     rate_surround = comment_form.cleaned_data["rate_surround"]
+        #     rate_service = comment_form.cleaned_data["rate_service"]
+        #     new_comment = Comment()
+        #     new_comment.content =content
+        #     new_comment.rate_taste = rate_taste
+        #     new_comment.rate_surround = rate_surround
+        #     new_comment.rate_service = rate_service
+        #     new_comment.resturant = resturant
+        #     new_comment.user = user
+        #     new_comment.create_time = timezone.now()
+        #     new_comment.save()
+    return render(request, "resturants/res_detail.html", locals())
 
 
 # 载入餐厅数据

@@ -1,13 +1,109 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="card bg-dark" style="width: 25rem;">
-          <img src="{{ object.res_image.url }}" class="card-img-top" alt="...">
+<div class="container">
+<div class="row">
+<div class="col">
+    <div class="card bg-dark" style="width: 25rem;">
+          <img src="{{ resturant.res_image.url }}" class="card-img-top" alt="...">
           <div class="card-body">
-            <h5 class="card-title">{{ object.name }}</h5>
-            <p class="card-text">{{ object.address }}</p>
-            <p class="card-text">{{ object.type }}</p>
-            <p class="card-text">口味:{{ object.rate_taste }}  环境:{{ object.rate_surround }}  服务:{{ object.rate_service }}</p>
+            <h5 class="card-title">{{ resturant.name }}</h5>
+            <p class="card-text">{{ resturant.address }}</p>
+            <p class="card-text">{{ resturant.type }}</p>
+            <p class="card-text">口味:{{ resturant.rate_taste }}  环境:{{ resturant.rate_surround }}  服务:{{ resturant.rate_service }}</p>
+              {% if not info_qs %}
+              <p class="card-text">我还未在该餐厅用过餐</p>
+              {% else %}
+              <p class="card-text">我已在该餐厅用过餐</p>
+              {% endif %}
+              <button type="button" class="btn btn-primary">用餐</button>
           </div>
+    </div>
+</div>
+    <br/>
+    <br/>
+<div class="col">
+    <form method="post">
+        {% csrf_token %}
+    <div class="input-group mb-3">
+      <div class="input-group-prepend">
+        <label class="input-group-text pinglun-select-label" for="inputGroupSelect01">口味</label>
+      </div>
+      <select name="select1" id="inputGroupSelect01" class="pinglun-select">
+        <option selected>请为该餐厅的口味评分</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+      </select>
+    </div>
+
+    <div class="input-group mb-3">
+      <div class="input-group-prepend">
+        <label class="input-group-text pinglun-select-label" for="inputGroupSelect02">环境</label>
+      </div>
+      <select name="select2" id="inputGroupSelect02" class="pinglun-select">
+        <option selected>请为该餐厅的环境评分</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+      </select>
+    </div>
+
+    <div class="input-group mb-3">
+      <div class="input-group-prepend">
+        <label class="input-group-text pinglun-select-label" for="inputGroupSelect03">服务</label>
+      </div>
+      <select name="select3" id="inputGroupSelect03" class="pinglun-select">
+        <option selected>请为该餐厅的环境评分</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+      </select>
+    </div>
+
+      <div class="input-group">
+        <div class="input-group-prepend">
+          <span class="input-group-text" style="margin-right:10px;">评论内容</span>
         </div>
+          <textarea class="form-control" name="comment" aria-label="With textarea"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary pull-right">提交</button>
+    </form>
+    <br />
+    <br />
+    <h4>我的评论</h4>
+    {% if my_comment_qs %}
+    <ul class="list-group">
+    {% for my_comment in my_comment_qs %}
+    <li class="list-group-item list-group-item-dark">
+        口味:{{ my_comment.rate_taste }}  环境:{{ my_comment.rate_surround }}  服务:{{ my_comment.rate_service }}  {{ my_comment.create_time|date:"Y-m-d" }}
+        <br/>{{ my_comment.content }}
+    </li>
+    {% endfor %}
+    </ul>
+    {% else %}
+    <p>您还没有在该餐厅留下足迹!</p>
+    {% endif %}
+    <br/>
+    <br/>
+    <h4>所有评论</h4>
+    {% if comment_qs %}
+    <ul class="list-group">
+    {% for comment in comment_qs %}
+    <li class="list-group-item list-group-item-dark">用户:{{comment.user.username}}<br/>
+        口味:{{ comment.rate_taste }}  环境:{{ comment.rate_surround }}  服务:{{ comment.rate_service }}<br/>{{ comment.content }}</li>
+    {% endfor %}
+    </ul>
+    {% else %}
+    <p>该餐厅还没有评论!</p>
+    {% endif %}
+</div>
+</div>
+</div>
 {% endblock content %}
