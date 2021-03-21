@@ -24,6 +24,9 @@
     <br/>
 <div class="col">
     <form method="post">
+        {% if message %}
+            <div class="alert alert-warning">{{ message }}</div>
+        {% endif %}
         {% csrf_token %}
     <div class="input-group mb-3">
       <div class="input-group-prepend">
@@ -58,7 +61,7 @@
         <label class="input-group-text pinglun-select-label" for="inputGroupSelect03">服务</label>
       </div>
       <select name="select3" id="inputGroupSelect03" class="pinglun-select">
-        <option selected>请为该餐厅的环境评分</option>
+        <option selected>请为该餐厅的服务评分</option>
         <option value="1">1</option>
         <option value="2">2</option>
         <option value="3">3</option>

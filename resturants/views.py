@@ -103,6 +103,7 @@ def login_confirm(func):
 
 
 # 查看某个餐厅的详细信息
+# 包括用户可以在此订餐、评论和查看对应的评价
 @login_confirm
 def res_detail_view(request, pk, *args, **kwargs):
     resturant = Resturant.objects.get(pk=pk)
@@ -112,19 +113,35 @@ def res_detail_view(request, pk, *args, **kwargs):
     comment_qs = Comment.objects.filter(resturant=resturant)
     my_comment_qs = Comment.objects.filter(resturant=resturant)
     if request.method == "POST":
-        content = request.POST.get("comment")
-        rate_taste = int(request.POST.get("select1"))
-        rate_surround = int(request.POST.get("select2"))
-        rate_service = int(request.POST.get("select3"))
-        new_comment = Comment()
-        new_comment.resturant = resturant
-        new_comment.user = user
-        new_comment.content = content
-        new_comment.rate_taste = rate_taste
-        new_comment.rate_surround = rate_surround
-        new_comment.rate_service = rate_service
-        new_comment.create_time = timezone.now()
-        new_comment.save()
+        content = request.POST.get("comment" or None)
+        rate_taste = 5
+        rate_surround = 5
+        rate_service = 5
+        message = ""
+        if request.POST.get("select1") != "请为该餐厅的口味评分":
+            rate_taste = int(request.POST.get("select1"))
+        else:
+            message = "请填写完整的评价内容！"
+        if request.POST.get("select2") != "请为该餐厅的环境评分":
+            rate_surround = int(request.POST.get("select2"))
+        else:
+            message = "请填写完整的评价内容！"
+        if request.POST.get("select3") != "请为该餐厅的服务评分":
+            rate_service = int(request.POST.get("select3"))
+        else:
+            message = "请填写完整的评价内容！"
+        if content:
+            new_comment = Comment()
+            new_comment.resturant = resturant
+            new_comment.user = user
+            new_comment.content = content
+            new_comment.rate_taste = rate_taste
+            new_comment.rate_surround = rate_surround
+            new_comment.rate_service = rate_service
+            new_comment.create_time = timezone.now()
+            new_comment.save()
+            content = None
+            return redirect("/detail/%s/" % pk)
         # comment_form = CommentForm(request.POST or None)
         # message = ""
         # if comment_form.is_valid():
