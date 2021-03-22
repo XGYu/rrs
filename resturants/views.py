@@ -3,6 +3,7 @@ import os
 
 from functools import wraps
 from django.utils import timezone
+from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
@@ -18,13 +19,28 @@ def index(request):
 
 # 主页：展示前五个餐厅
 def show_res_view(request, *arg, **kwargs):
-    qs = Resturant.objects.all()[:5]
+    qs = Resturant.objects.all()[:10]
     resturant = None
     if qs.exists():
         resturant = qs
     return render(request, "resturants/detail.html", {"object": resturant})
 
 
+# 展示全部餐厅
+def all_res_view(request, *args, **kwargs):
+    res_qs = Resturant.objects.all()
+    limit = 10
+    paginator = Paginator(res_qs, limit)
+    page = request.GET.get("page", "1")
+
+    result = paginator.page(page)
+
+    return render(request, "resturants/all_res.html", {"res_page": result})
+
+
+
+
+# 登录模块
 def login_view(request, *args, **kwargs):
     if request.session.get('is_login', None):
         return redirect("/")
@@ -82,6 +98,7 @@ def register_view(request, *args, **kwargs):
     return render(request, "login/register.html", locals())
 
 
+# 登出模块
 def logout_view(request, *args, **kwargs):
     if not request.session.get("is_login", None):
         return redirect("/")
@@ -100,6 +117,16 @@ def login_confirm(func):
         else:
             return redirect("/login/")
     return wrapper
+
+
+# 个人信息页面
+@login_confirm
+def my_info_view(request, *args, **kwargs):
+    username = request.session["user_name"]
+    user = User.objects.get(username=username)
+    comment_qs = Comment.objects.filter(user=user)
+    info_qs = Info.objects.filter(user=user)
+    return render(request, "resturants/my_info.html", locals())
 
 
 # 查看某个餐厅的详细信息

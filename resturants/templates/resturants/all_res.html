@@ -1,8 +1,9 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block content %}
+
 <div class="container">
-  <div class="row text-center vertical-middle-sm">
+  <div class="row">
     <div class="col-2">
       <div class="btn-group-vertical">
         <a class="btn btn-dark btn-lg" href="/all-res/" role="button">全部餐厅</a>
@@ -11,9 +12,9 @@
         <a class="btn btn-dark btn-lg" href="/my-info/" role="button">我的信息</a>
       </div>
     </div>
-    <div class="col-md-6">
-      {% for res in object %}
-        <div class="card bg-dark text-center" style="width: 25rem;">
+    <div class="col-6">
+      {% for res in res_page %}
+        <div class="card bg-dark" style="width: 25rem;">
           <img src="{{ res.res_image.url }}" class="card-img-top" alt="...">
           <div class="card-body">
             <h5 class="card-title">{{ res.name }}</h5>
@@ -28,6 +29,21 @@
         <div></div>
         <br />
        {% endfor %}
+
+        <div>
+           <nav aria-label="Page navigation example">
+           <ul class="pagination">
+           <li class="page-item"><a class="page-link" href="/all-res/?page=1">首页</a></li>
+                {% if res_page.has_previous %}
+                    <li class="page-item"><a class="page-link" href="/all-res/?page={{ res_page.previous_page_number }}">{{ res_page.previous_page_number }}</a></li>
+                {% endif %}
+                {% if res_page.has_next %}
+                    <li class="page-item"><a class="page-link" href="/all-res/?page={{ res_page.next_page_number }}">{{ res_page.next_page_number }}</a></li>
+                {% endif %}
+                 <li class="page-item"><a class="page-link" href="/all-res/?page={{ res_page.paginator.num_pages }}">尾页</a></li>
+            </ul>
+            </nav>
+        </div>
     </div>
   </div>
 </div>
