@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row text-center vertical-middle-sm">
+        <div class="col-2">
+            <div class="btn-group-vertical">
+                <a class="btn btn-dark btn-lg" href="/all-res/" role="button">全部餐厅</a>
+                <a class="btn btn-dark btn-lg" href="/week-star/" role="button">本周星选</a>
+                <a class="btn btn-dark btn-lg" href="/guess-you/" role="button">猜您喜欢</a>
+                <a class="btn btn-dark btn-lg" href="/my-info/" role="button">我的信息</a>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="alert alert-success" role="alert">根据您的历史用餐信息，为您推荐以下餐厅！</div>
+            {% for res in res_qs %}
+            <div class="card bg-dark text-center" style="width: 25rem;">
+                <img src="{{ res.res_image.url }}" class="card-img-top" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title">{{ res.name }}</h5>
+                    <p class="card-text">{{ res.address }}</p>
+                    <p class="card-text">{{ res.type }}</p>
+                    <p class="card-text">口味:{{ res.rate_taste }}  环境:{{ res.rate_surround }}  服务:{{ res.rate_service }}</p>
+                </div>
+                <div class="card-body">
+                    <a href="/detail/{{ res.pk }}/" class="btn btn-primary btn-lg">查看</a>
+                </div>
+            </div>
+            <div></div>
+            <br />
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

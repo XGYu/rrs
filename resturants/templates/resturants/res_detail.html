@@ -7,7 +7,7 @@
     <div class="card bg-dark" style="width: 25rem;">
           <img src="{{ resturant.res_image.url }}" class="card-img-top" alt="...">
           <div class="card-body">
-            <h5 class="card-title">{{ resturant.name }}</h5>
+              <h5 class="card-title"><a href="https://www.baidu.com/s?ie=UTF-8&wd={{ resturant.name }}">{{ resturant.name }}</a></h5>
             <p class="card-text">{{ resturant.address }}</p>
             <p class="card-text">{{ resturant.type }}</p>
             <p class="card-text">口味:{{ resturant.rate_taste }}  环境:{{ resturant.rate_surround }}  服务:{{ resturant.rate_service }}</p>
@@ -16,6 +16,7 @@
               {% else %}
               <p class="card-text">我已在该餐厅用过餐</p>
               {% endif %}
+
             <form method="get">
               {% if not clicklunch %}
                 <input type="hidden" name="lunchevent" value=1>

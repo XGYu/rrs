@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<hr class="my-4">
 <div class="container">
   <div class="row text-center vertical-middle-sm">
     <div class="col-2">
@@ -12,6 +13,13 @@
       </div>
     </div>
     <div class="col-md-6">
+      <form class="well form-search" method="get" action="/search/">
+        {% csrf_token %}
+        <input type="text" class="input-medium search-query" name="q">
+        <button type="submit" class="btn btn-primary">搜索</button>
+      </form>
+      <br>
+      <br>
       {% for res in object %}
         <div class="card bg-dark text-center" style="width: 25rem;">
           <img src="{{ res.res_image.url }}" class="card-img-top" alt="...">
@@ -31,5 +39,5 @@
     </div>
   </div>
 </div>
-
+<span class="badge bg-success" href="">Success</span>
 {% endblock content %}

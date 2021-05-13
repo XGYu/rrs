@@ -21,7 +21,9 @@ class User(models.Model):
 
 class Resturant(models.Model):
     name = models.CharField(max_length=200, verbose_name='名称')
-    longlatitude = models.CharField(max_length=200, null=True, blank=True, verbose_name='坐标')
+    longlatitude = models.CharField(max_length=200, null=True, blank=True, verbose_name='编号')
+    longtitude = models.DecimalField(max_digits=12, decimal_places=9, null=True, blank=True, verbose_name="经度")
+    latitude = models.DecimalField(max_digits=12, decimal_places=9, null=True, blank=True, verbose_name="纬度")
     address = models.CharField(max_length=255, verbose_name='地址')
     type = models.CharField(max_length=32, default="自助餐", verbose_name="类型")
     position = models.CharField(max_length=32, null=True, blank=True, verbose_name="商区")
@@ -52,7 +54,6 @@ class Info(models.Model):
     class Meta:
         verbose_name = '就餐信息'
         verbose_name_plural = '就餐信息'
-
 
 # 记录用户的评价信息，作为后续系统的改进
 class Comment(models.Model):

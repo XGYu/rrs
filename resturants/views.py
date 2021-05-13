@@ -9,7 +9,11 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .models import *
 from .forms import *
+from .hme import *
+from .jrlm import *
 import random
+
+import pandas as pd
 
 
 # Create your views here.
@@ -24,6 +28,18 @@ def show_res_view(request, *arg, **kwargs):
     if qs.exists():
         resturant = qs
     return render(request, "resturants/detail.html", {"object": resturant})
+
+
+# 搜索
+def search_view(request, *args, **kwargs):
+    q = request.GET.get('q')
+    err_msg = ''
+    if not q:
+        err_msg = '请输入关键词'
+        return render(request, "resturants/search.html", locals())
+
+    res_qs = Resturant.objects.filter(name__icontains=q)
+    return render(request, "resturants/search.html", locals())
 
 
 # 展示全部餐厅
@@ -200,17 +216,17 @@ def res_detail_view(request, pk, *args, **kwargs):
 
 # 载入餐厅数据
 def load_res_data_view(request, *args, **kwargs):
-    f_res = open("./data/resturants.txt", "r", encoding="utf-8")
-    f_loc = open("./data/location.txt", "r", encoding="utf-8")
+    f_res = open("./data/result_shanghai.txt", "r", encoding="utf-8")
+    df_loc = pd.read_csv("./data/rrs_resturant.csv")
+
     Resturant.objects.all().delete()
-    while True:
+    for row in df_loc.iterrows():
         res_line = f_res.readline()
-        loc_line = f_loc.readline().strip().split()
-        if (not res_line) or (not loc_line):
-            break
         js_data = json.loads(res_line)
         name = js_data["商铺"]
-        longlatitude = loc_line[0]
+        longlatitude = row[1]['venueId']
+        longtitude = row[1]['longitude']
+        latitude = row[1]['latitude']
         address = js_data["地址"]
         type = js_data["类型"]
         position = js_data["商区"]
@@ -220,9 +236,8 @@ def load_res_data_view(request, *args, **kwargs):
         resturant = Resturant.objects.create(name=name, address=address, longlatitude=longlatitude,
                                              type=type, position=position,
                                              rate_taste=rate_taste, rate_surround=rate_surround,
-                                             rate_service=rate_service)
+                                             rate_service=rate_service, longtitude=longtitude, latitude=latitude)
     f_res.close()
-    f_loc.close()
     return redirect("/load-user-data-once/")
 
 
@@ -240,7 +255,7 @@ def load_res_img_view(request, *args, **kwargs):
 
 # 载入用户数据
 def load_user_data_view(request, *args, **kwargs):
-    f_user = open("./data/user.txt", "r", encoding='utf-8')
+    f_user = open("./data/rrs_userlist.txt", "r", encoding='utf-8')
     User.objects.all().delete()
     while True:
         user_line = f_user.readline().strip().split()
@@ -255,30 +270,52 @@ def load_user_data_view(request, *args, **kwargs):
 
 # 载入就餐记录
 def load_info_data_view(request, *args, **kwargs):
-    f_info = open("./data/nyc_data.txt", "r", encoding="utf-8")
+    df_record = pd.read_csv('./data/rrs_record.csv')
+    del df_record['longitude']
+    del df_record['latitude']
+    df_record['utcTimestamp'] =  pd.to_datetime(df_record['utcTimestamp'], format='%Y-%m-%d %H:%M:%S')
     Info.objects.all().delete()
-    info_line = f_info.readline()
-    info = info_line.strip().split(" ")
-    cur_user = info[0]
-    user = User.objects.get(username=cur_user)
-    while True:
-        if not info_line:
-            break
-        if info[0][0] == "u":
-            cur_user = info[0]
-            user = User.objects.get(username=cur_user)
-        for pos in info:
-            if pos[0] == 'l':
-                try:
-                    res = Resturant.objects.get(longlatitude=pos)
-                    new_info = Info.objects.create(user=user, resturant=res)
-                except Resturant.DoesNotExist:
-                    print(pos)
-        info_line = f_info.readline()
-        info = info_line.strip().split(" ")
-
+    for i in range(len(df_record)):
+        username = df_record['userId'][i]
+        user = User.objects.get(username=username)
+        venueId = df_record['venueId'][i]
+        resturant = Resturant.objects.get(longlatitude=venueId)
+        record_time = df_record['utcTimestamp'][i]
+        new_info = Info.objects.create(user=user, resturant=resturant, info_time=record_time)
     return render(request, "resturants/load_data.html", {})
 
 
+# 利用hme算法为用户推荐餐馆
+@login_confirm
+def hme_rrs_view(request, *args, **kwargs):
+    username = request.session["user_name"]         # 获取了当前用户名
+    user = User.objects.filter(username=username)[0]
+    info = Info.objects.filter(user=user).order_by('-info_time')[0]
+    res = info.resturant
+    r_list = RecTopK(0.8, 5, user.username, res.longlatitude)
+    res_list = []
+    for r_no in r_list:
+        res_list.append(Resturant.objects.get(longlatitude=r_no))
+    res_qs = Resturant.objects.filter(pk__in=[x.pk for x in res_list])
+    print('top5推荐算法：')
+    for res in res_qs:
+        print(res.name, "\t", res.address)
+    return render(request, "resturants/hme_rrs.html", locals())
 
 
+# 利用jrlm算法为用户推荐餐馆
+@login_confirm
+def jrlm_rrs_view(request, *args, **kwargs):
+    username = request.session["user_name"]         # 获取了当前用户名
+    user = User.objects.filter(username=username)[0]
+    info = Info.objects.filter(user=user).order_by('-info_time')[0]
+    res = info.resturant
+    r_list = RecTopK(0.5, 10, user.username, res.longlatitude)
+    res_list = []
+    for r_no in r_list:
+        res_list.append(Resturant.objects.get(longlatitude=r_no))
+    res_qs = Resturant.objects.filter(pk__in=[x.pk for x in res_list])
+    print('top10推荐算法：')
+    for res in res_qs:
+        print(res.name, "\t", res.address)
+    return render(request, "resturants/jrlm_rrs.html", locals())

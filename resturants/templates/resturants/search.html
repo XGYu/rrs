@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% if error_msg %}
+<p>{{ error_msg }}</p>
+{% endif %}
+
+{% for res in res_qs %}
+<div class="card bg-dark text-center" style="width: 25rem;">
+    <img src="{{ res.res_image.url }}" class="card-img-top" alt="...">
+    <div class="card-body">
+        <h5 class="card-title">{{ res.name }}</h5>
+        <p class="card-text">{{ res.address }}</p>
+        <p class="card-text">{{ res.type }}</p>
+        <p class="card-text">口味:{{ res.rate_taste }}  环境:{{ res.rate_surround }}  服务:{{ res.rate_service }}</p>
+    </div>
+    <div class="card-body">
+        <a href="/detail/{{ res.pk }}/" class="btn btn-primary btn-lg">查看</a>
+    </div>
+</div>
+
+{% empty %}
+<div class="alert alert-danger" role="alert">没有搜索到符合条件的餐馆！</div>
+<br />
+{% endfor %}
+
+{% endblock content %}
